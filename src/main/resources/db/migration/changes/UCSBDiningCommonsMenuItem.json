@@ -23,9 +23,10 @@
                             "columns": [
                                 {
                                     "column": {
+                                        "autoIncrement": true,
                                         "constraints": {
                                             "primaryKey": true,
-                                            "primaryKeyNam": "DININGCOMMONSMENUITEM_PK"
+                                            "primaryKeyName": "DININGCOMMONSMENUITEM_PK"
                                         },
                                         "name": "ID",
                                         "type": "BIGINT"
@@ -33,7 +34,7 @@
                                 },
                                 {
                                     "column": {
-                                        "name": "DININGCOMMONSCODE",
+                                        "name": "DINING_COMMONS_CODE",
                                         "type": "VARCHAR(255)"
                                     }
                                 },

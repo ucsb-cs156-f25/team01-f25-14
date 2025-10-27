@@ -1,0 +1,36 @@
+{
+"databaseChangeLog": [
+    {
+    "changeSet": {
+        "id": "helprequest-1",
+        "author": "fvelazquez",
+        "changes": [
+        {
+            "createTable": {
+            "tableName": "helprequests",
+            "columns": [
+                {
+                "column": {
+                    "name": "id",
+                    "type": "bigint",
+                    "autoIncrement": true,
+                    "constraints": {
+                    "primaryKey": true,
+                    "nullable": false
+                    }
+                }
+                },
+                { "column": { "name": "requester_email", "type": "varchar(255)" } },
+                { "column": { "name": "team_name", "type": "varchar(255)" } },
+                { "column": { "name": "request_text", "type": "text" } },
+                { "column": { "name": "time_requested", "type": "timestamp" } },
+                { "column": { "name": "time_completed", "type": "timestamp" } },
+                { "column": { "name": "resolved", "type": "boolean" } }
+            ]
+            }
+        }
+        ]
+    }
+    }
+]
+}

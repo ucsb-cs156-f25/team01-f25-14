@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 /**
  * This is a JPA entity that represents a UCSB Organization
  *
- * <p>A UCSBDiningCommons is a dining commons at UCSB
+ * <p>A UCSBOrganization is an organization at UCSB
  */
 @Data
 @AllArgsConstructor
@@ -21,6 +21,6 @@ public class UCSBOrganization {
   @Id private String orgCode;
 
   private String orgTranslationShort;
-  private String orgTranslationl;
+  private String orgTranslation;
   private boolean inactive;
 }

@@ -53,7 +53,7 @@ public class HelpRequestControllerTests extends ControllerTestCase {
 
   @Test
   public void logged_out_users_cannot_get_by_id() throws Exception {
-    mockMvc.perform(get("/api/helprequest?id=7")).andExpect(status().is(403));
+    mockMvc.perform(get("/api/helprequest?id=123")).andExpect(status().is(403));
   }
 
   @Test
@@ -67,7 +67,7 @@ public class HelpRequestControllerTests extends ControllerTestCase {
     mockMvc.perform(post("/api/helprequest/post")).andExpect(status().is(403));
   }
 
-  // GET /api/helprequest?id=7
+  // GET /api/helprequest?id=123
 
   @WithMockUser(roles = {"USER"})
   @Test
@@ -83,28 +83,31 @@ public class HelpRequestControllerTests extends ControllerTestCase {
             .solved(false)
             .build();
 
-    when(helpRequestRepository.findById(eq(7L))).thenReturn(Optional.of(help));
+    when(helpRequestRepository.findById(eq(123L))).thenReturn(Optional.of(help));
 
     MvcResult response =
-        mockMvc.perform(get("/api/helprequest?id=7")).andExpect(status().is(200)).andReturn();
+        mockMvc.perform(get("/api/helprequest?id=123")).andExpect(status().is(200)).andReturn();
 
-    verify(helpRequestRepository, times(1)).findById(eq(7L));
+    verify(helpRequestRepository, times(1)).findById(eq(123L));
     assertEquals(mapper.writeValueAsString(help), response.getResponse().getContentAsString());
   }
 
   @WithMockUser(roles = {"USER"})
   @Test
   public void get_by_id_when_not_found() throws Exception {
-    when(helpRequestRepository.findById(eq(7L))).thenReturn(Optional.empty());
+    when(helpRequestRepository.findById(eq(123L))).thenReturn(Optional.empty());
 
     MvcResult response =
-        mockMvc.perform(get("/api/helprequest?id=7")).andExpect(status().isNotFound()).andReturn();
+        mockMvc
+            .perform(get("/api/helprequest?id=123"))
+            .andExpect(status().isNotFound())
+            .andReturn();
 
-    verify(helpRequestRepository, times(1)).findById(eq(7L));
+    verify(helpRequestRepository, times(1)).findById(eq(123L));
 
     Map<String, Object> json = responseToJson(response);
     assertEquals("EntityNotFoundException", json.get("type"));
-    assertEquals("HelpRequest with id 7 not found", json.get("message"));
+    assertEquals("HelpRequest with id 123 not found", json.get("message"));
   }
 
   // GET /api/helprequest/all

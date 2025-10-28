@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest(controllers = MenuItemReview.class)
+@WebMvcTest(controllers = MenuItemReviewController.class)
 @Import(TestConfig.class)
 public class MenuItemReviewControllerTests extends ControllerTestCase {
 

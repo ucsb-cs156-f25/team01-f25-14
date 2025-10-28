@@ -58,7 +58,8 @@ public class MenuItemReviewController extends ApiController {
       @Parameter(name = "stars") @RequestParam int stars,
       @Parameter(
               name = "dateReviewed",
-              description = "date-time (ISO 8601, e.g. 2022-04-20T00:00:00)")
+              description =
+                  "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)")
           @RequestParam("dateReviewed")
           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
           LocalDateTime dateReviewed,

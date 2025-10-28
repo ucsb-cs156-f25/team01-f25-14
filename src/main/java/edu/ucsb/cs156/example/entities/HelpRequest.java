@@ -1,4 +1,4 @@
-package edu.ucsb.cs156.team01.entities;
+package edu.ucsb.cs156.example.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,9 +21,9 @@ public class HelpRequest {
   private long id;
 
   private String requesterEmail; // email of the student making the request
-  private String teamName; // team identifier
-  private String requestText; // the content of the request
-  private boolean solved; // could be "true" or "false"
-  private String explanation; // optional additional context
+  private String teamId; // team identifier
+  private String tableOrBreakoutRoom; // the content of the request
   private LocalDateTime requestTime; // get time
+  private String explanation; // optional additional context
+  private boolean solved; // could be "true" or "false"
 }

@@ -2,12 +2,12 @@
 "databaseChangeLog": [
     {
     "changeSet": {
-        "id": "helprequest-1",
+        "id": "HelpRequest-1",
         "author": "fvelazquez",
         "changes": [
         {
             "createTable": {
-            "tableName": "helprequests",
+            "tableName": "HELPREQUEST",
             "columns": [
                 {
                 "column": {
@@ -21,11 +21,11 @@
                 }
                 },
                 { "column": { "name": "requester_email", "type": "varchar(255)" } },
-                { "column": { "name": "team_name", "type": "varchar(255)" } },
-                { "column": { "name": "request_text", "type": "text" } },
+                { "column": { "name": "team_id", "type": "varchar(255)" } },
+                { "column": { "name": "tableOrBreakoutRoom", "type": "varchar(255)" } },
                 { "column": { "name": "time_requested", "type": "timestamp" } },
-                { "column": { "name": "time_completed", "type": "timestamp" } },
-                { "column": { "name": "resolved", "type": "boolean" } }
+                { "column": { "name": "explantion", "type": "varchar(255)" } },
+                { "column": { "name": "solved", "type": "boolean" } }
             ]
             }
         }

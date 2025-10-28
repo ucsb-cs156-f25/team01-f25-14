@@ -237,32 +237,33 @@ public class HelpRequestControllerTests extends ControllerTestCase {
 
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
-  public void admin_can_edit_existing_help_request() throws Exception {
-    LocalDateTime t = LocalDateTime.parse("2022-01-03T00:00:00");
+  public void admin_can_edit_an_existing_help_request() throws Exception {
 
-    HelpRequest original =
+    LocalDateTime ldt1 = LocalDateTime.parse("2023-05-03T00:00:00");
+    LocalDateTime ldt2 = LocalDateTime.parse("2024-03-03T00:00:00");
+
+    HelpRequest helpRequestOrig =
         HelpRequest.builder()
-            .requesterEmail("orig@ucsb.edu")
+            .requesterEmail("a@ucsb.edu")
             .teamId("f25-14")
-            .tableOrBreakoutRoom("table1")
-            .requestTime(t)
-            .explanation("Original")
+            .tableOrBreakoutRoom("Table")
+            .requestTime(ldt1)
+            .explanation("test a")
             .solved(false)
             .build();
 
-    HelpRequest edited =
+    HelpRequest helpRequestEdited =
         HelpRequest.builder()
-            .requesterEmail("edit@ucsb.edu")
+            .requesterEmail("fv@ucsb.edu")
             .teamId("f25-99")
-            .tableOrBreakoutRoom("table2")
-            .requestTime(t)
-            .explanation("Edited text")
+            .tableOrBreakoutRoom("Breakout")
+            .requestTime(ldt2)
+            .explanation("test fv")
             .solved(true)
             .build();
 
-    String requestBody = mapper.writeValueAsString(edited);
-
-    when(helpRequestRepository.findById(eq(67L))).thenReturn(Optional.of(original));
+    String requestBody = mapper.writeValueAsString(helpRequestEdited);
+    when(helpRequestRepository.findById(eq(67L))).thenReturn(Optional.of(helpRequestOrig));
 
     MvcResult response =
         mockMvc
@@ -276,17 +277,9 @@ public class HelpRequestControllerTests extends ControllerTestCase {
             .andReturn();
 
     verify(helpRequestRepository, times(1)).findById(67L);
-    verify(helpRequestRepository, times(1)).save(eq(edited));
-
-    HelpRequest actual =
-        mapper.readValue(response.getResponse().getContentAsString(), HelpRequest.class);
-
-    assertEquals("edit@ucsb.edu", actual.getRequesterEmail());
-    assertEquals("f25-99", actual.getTeamId());
-    assertEquals("table2", actual.getTableOrBreakoutRoom());
-    assertEquals("Edited text", actual.getExplanation());
-    assertEquals(true, actual.getSolved());
-    assertEquals(t, actual.getRequestTime());
+    verify(helpRequestRepository, times(1)).save(helpRequestEdited);
+    String responseString = response.getResponse().getContentAsString();
+    assertEquals(requestBody, responseString);
   }
 
   @WithMockUser(roles = {"ADMIN", "USER"})

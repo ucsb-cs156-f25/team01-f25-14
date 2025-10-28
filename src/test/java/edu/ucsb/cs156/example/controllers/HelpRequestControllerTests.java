@@ -233,7 +233,7 @@ public class HelpRequestControllerTests extends ControllerTestCase {
     assertEquals("HelpRequest with id 15 not found", json.get("message"));
   }
 
-  // PUT /api/helprequest?id=
+  // Put /api/helprequest?id=
 
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test

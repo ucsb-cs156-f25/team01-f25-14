@@ -4,28 +4,73 @@
     "changeSet": {
         "id": "HelpRequest-1",
         "author": "fvelazquez",
+        "preConditions": [
+        {
+            "onFail": "MARK_RAN"
+        },
+        {
+            "not": [
+            {
+                "tableExists": {
+                "tableName": "HELPREQUESTS"
+                }
+            }
+            ]
+        }
+        ],
         "changes": [
         {
             "createTable": {
-            "tableName": "HELPREQUEST",
+            "tableName": "HELPREQUESTS",
             "columns": [
                 {
                 "column": {
-                    "name": "id",
-                    "type": "bigint",
+                    "name": "ID",
+                    "type": "BIGINT",
                     "autoIncrement": true,
                     "constraints": {
                     "primaryKey": true,
+                    "primaryKeyName": "HELPREQUESTS_PK",
                     "nullable": false
                     }
                 }
                 },
-                { "column": { "name": "requester_email", "type": "varchar(255)" } },
-                { "column": { "name": "team_id", "type": "varchar(255)" } },
-                { "column": { "name": "tableOrBreakoutRoom", "type": "varchar(255)" } },
-                { "column": { "name": "time_requested", "type": "timestamp" } },
-                { "column": { "name": "explantion", "type": "varchar(255)" } },
-                { "column": { "name": "solved", "type": "boolean" } }
+                {
+                "column": {
+                    "name": "REQUESTER_EMAIL",
+                    "type": "VARCHAR(255)"
+                }
+                },
+                {
+                "column": {
+                    "name": "TEAM_ID",
+                    "type": "VARCHAR(255)"
+                }
+                },
+                {
+                "column": {
+                    "name": "TABLE_OR_BREAKOUT_ROOM",
+                    "type": "VARCHAR(255)"
+                }
+                },
+                {
+                "column": {
+                    "name": "REQUEST_TIME",
+                    "type": "TIMESTAMP"
+                }
+                },
+                {
+                "column": {
+                    "name": "EXPLANATION",
+                    "type": "VARCHAR(255)"
+                }
+                },
+                {
+                "column": {
+                    "name": "SOLVED",
+                    "type": "BOOLEAN"
+                }
+                }
             ]
             }
         }

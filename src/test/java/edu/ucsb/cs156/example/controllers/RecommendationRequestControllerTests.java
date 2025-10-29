@@ -75,6 +75,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("requester@ucsb.edu")
             .professorEmail("email@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)
@@ -112,6 +113,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)
@@ -123,7 +125,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
     MvcResult response =
         mockMvc
             .perform(
-                post("/api/recommendationrequest/post?requesterEmail=user@ucsb.edu&professorEmail=professor@ucsb.edu&dateRequested=2022-01-03T00:00:00&dateNeeded=2022-01-03T00:00:00&done=true")
+                post("/api/recommendationrequest/post?requesterEmail=user@ucsb.edu&professorEmail=professor@ucsb.edu&explanation=explanation&dateRequested=2022-01-03T00:00:00&dateNeeded=2022-01-03T00:00:00&done=true")
                     .with(csrf()))
             .andExpect(status().isOk())
             .andReturn();
@@ -153,6 +155,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)
@@ -203,24 +206,26 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
     // arrange
 
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
-    LocalDateTime ldt2 = LocalDateTime.parse("2023-01-03T00:00:00");
+    LocalDateTime ldt2 = LocalDateTime.parse("2023-01-03T00:00:10");
 
     RecommendationRequest request1 =
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
-            .done(true)
+            .done(false)
             .build();
 
     RecommendationRequest request2 =
         RecommendationRequest.builder()
-            .requesterEmail("user@ucsb.edu")
+            .requesterEmail("newuser@ucsb.edu")
             .professorEmail("newprofessor@ucsb.edu")
-            .dateRequested(ldt1)
-            .dateNeeded(ldt2)
-            .done(true)
+            .explanation("explanation1")
+            .dateRequested(ldt2)
+            .dateNeeded(ldt1)
+            .done(false)
             .build();
 
     String requestBody = mapper.writeValueAsString(request2);
@@ -259,6 +264,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)

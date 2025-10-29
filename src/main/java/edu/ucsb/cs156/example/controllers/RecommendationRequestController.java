@@ -54,6 +54,7 @@ public class RecommendationRequestController extends ApiController {
   public RecommendationRequest postRecommendationRequest(
       @Parameter(name = "requesterEmail") @RequestParam String requesterEmail,
       @Parameter(name = "professorEmail") @RequestParam String professorEmail,
+      @Parameter(name = "explanation") @RequestParam String explanation,
       @Parameter(
               name = "daterequested",
               description =
@@ -80,6 +81,7 @@ public class RecommendationRequestController extends ApiController {
     RecommendationRequest request = new RecommendationRequest();
     request.setRequesterEmail(requesterEmail);
     request.setProfessorEmail(professorEmail);
+    request.setExplanation(explanation);
     request.setDateRequested(daterequested);
     request.setDateNeeded(dateneeded);
     request.setDone(done);
@@ -122,6 +124,7 @@ public class RecommendationRequestController extends ApiController {
 
     request.setRequesterEmail(incoming.getRequesterEmail());
     request.setProfessorEmail(incoming.getProfessorEmail());
+    request.setExplanation(incoming.getExplanation());
     request.setDateRequested(incoming.getDateRequested());
     request.setDateNeeded(incoming.getDateNeeded());
     request.setDone(incoming.getDone());

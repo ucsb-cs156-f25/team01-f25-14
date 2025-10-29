@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecommendationRequestController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">team01</a> &gt; <a href="index.source.html" class="el_package">edu.ucsb.cs156.example.controllers</a> &gt; <span class="el_source">RecommendationRequestController.java</span></div><h1>RecommendationRequestController.java</h1><pre class="source lang-java linenums">package edu.ucsb.cs156.example.controllers;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import edu.ucsb.cs156.example.entities.RecommendationRequest;
+import edu.ucsb.cs156.example.errors.EntityNotFoundException;
+import edu.ucsb.cs156.example.repositories.RecommendationRequestRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/** This is a REST controller for UCSBDates */
+@Tag(name = &quot;RecommendationRequest&quot;)
+@RequestMapping(&quot;/api/recommendationrequest&quot;)
+@RestController
+<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L30">public class RecommendationRequestController extends ApiController {</span>
+
+  @Autowired RecommendationRequestRepository recommendationrequestRepository;
+
+  @Operation(summary = &quot;List all ucsb dates&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(&quot;/all&quot;)
+  public Iterable&lt;RecommendationRequest&gt; allRecommendationRequests() {
+<span class="fc" id="L38">    Iterable&lt;RecommendationRequest&gt; requests = recommendationrequestRepository.findAll();</span>
+<span class="fc" id="L39">    return requests;</span>
+  }
+
+  /**
+   * Create a new request
+   *
+   * @param requesterEmail
+   * @param professorEmail
+   * @param daterequested
+   * @param dateneeded
+   * @param done
+   * @return the saved request
+   */
+  @Operation(summary = &quot;Create a new request&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+  @PostMapping(&quot;/post&quot;)
+  public RecommendationRequest postRecommendationRequest(
+      @Parameter(name = &quot;requesterEmail&quot;) @RequestParam String requesterEmail,
+      @Parameter(name = &quot;professorEmail&quot;) @RequestParam String professorEmail,
+      @Parameter(
+              name = &quot;daterequested&quot;,
+              description =
+                  &quot;date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)&quot;)
+          @RequestParam(&quot;dateRequested&quot;)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime daterequested,
+      @Parameter(
+              name = &quot;dateneeded&quot;,
+              description =
+                  &quot;date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)&quot;)
+          @RequestParam(&quot;dateNeeded&quot;)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime dateneeded,
+      @Parameter(name = &quot;done&quot;) @RequestParam boolean done)
+      throws JsonProcessingException {
+
+    // For an explanation of @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    // See: https://www.baeldung.com/spring-date-parameters
+
+<span class="fc" id="L78">    log.info(&quot;localDateTime={}&quot;, daterequested);</span>
+<span class="fc" id="L79">    log.info(&quot;localDateTime={}&quot;, dateneeded);</span>
+
+<span class="fc" id="L81">    RecommendationRequest request = new RecommendationRequest();</span>
+<span class="fc" id="L82">    request.setRequesterEmail(requesterEmail);</span>
+<span class="fc" id="L83">    request.setProfessorEmail(professorEmail);</span>
+<span class="fc" id="L84">    request.setDateRequested(daterequested);</span>
+<span class="fc" id="L85">    request.setDateNeeded(dateneeded);</span>
+<span class="fc" id="L86">    request.setDone(done);</span>
+
+<span class="fc" id="L88">    RecommendationRequest savedRecommendationRequest =</span>
+<span class="fc" id="L89">        recommendationrequestRepository.save(request);</span>
+
+<span class="fc" id="L91">    return savedRecommendationRequest;</span>
+  }
+
+  /**
+   * Get a single date by id
+   *
+   * @param id the id of the date
+   * @return a UCSBDate
+   */
+  @Operation(summary = &quot;Get a request&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+  @GetMapping(&quot;&quot;)
+  public RecommendationRequest getById(@Parameter(name = &quot;id&quot;) @RequestParam Long id) {
+<span class="fc" id="L104">    RecommendationRequest request =</span>
+        recommendationrequestRepository
+<span class="fc" id="L106">            .findById(id)</span>
+<span class="fc" id="L107">            .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
+
+<span class="fc" id="L109">    return request;</span>
+  }
+
+  @Operation(summary = &quot;Update a single request&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+  @PutMapping(&quot;&quot;)
+  public RecommendationRequest updateRecommendationRequest(
+      @Parameter(name = &quot;id&quot;) @RequestParam Long id,
+      @RequestBody @Valid RecommendationRequest incoming) {
+
+<span class="fc" id="L119">    RecommendationRequest request =</span>
+        recommendationrequestRepository
+<span class="fc" id="L121">            .findById(id)</span>
+<span class="fc" id="L122">            .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
+
+<span class="fc" id="L124">    request.setRequesterEmail(incoming.getRequesterEmail());</span>
+<span class="fc" id="L125">    request.setProfessorEmail(incoming.getProfessorEmail());</span>
+<span class="fc" id="L126">    request.setDateRequested(incoming.getDateRequested());</span>
+<span class="fc" id="L127">    request.setDateNeeded(incoming.getDateNeeded());</span>
+<span class="fc" id="L128">    request.setDone(incoming.getDone());</span>
+
+<span class="fc" id="L130">    recommendationrequestRepository.save(request);</span>
+
+<span class="fc" id="L132">    return request;</span>
+  }
+
+  @Operation(summary = &quot;Delete a request&quot;)
+  @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+  @DeleteMapping(&quot;&quot;)
+  public Object deleteRequest(@Parameter(name = &quot;id&quot;) @RequestParam Long id) {
+<span class="nc" id="L139">    RecommendationRequest request =</span>
+        recommendationrequestRepository
+<span class="nc" id="L141">            .findById(id)</span>
+<span class="nc" id="L142">            .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
+
+<span class="nc" id="L144">    recommendationrequestRepository.delete(request);</span>
+<span class="nc" id="L145">    return genericMessage(&quot;request with id %s deleted&quot;.formatted(id));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

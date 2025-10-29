@@ -7,6 +7,7 @@ import edu.ucsb.cs156.example.repositories.RecommendationRequestRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +54,7 @@ public class RecommendationRequestController extends ApiController {
   public RecommendationRequest postRecommendationRequest(
       @Parameter(name = "requesterEmail") @RequestParam String requesterEmail,
       @Parameter(name = "professorEmail") @RequestParam String professorEmail,
+      @Parameter(name = "explanation") @RequestParam String explanation,
       @Parameter(
               name = "daterequested",
               description =
@@ -77,6 +81,7 @@ public class RecommendationRequestController extends ApiController {
     RecommendationRequest request = new RecommendationRequest();
     request.setRequesterEmail(requesterEmail);
     request.setProfessorEmail(professorEmail);
+    request.setExplanation(explanation);
     request.setDateRequested(daterequested);
     request.setDateNeeded(dateneeded);
     request.setDone(done);
@@ -101,6 +106,30 @@ public class RecommendationRequestController extends ApiController {
         recommendationrequestRepository
             .findById(id)
             .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
+
+    return request;
+  }
+
+  @Operation(summary = "Update a single request")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PutMapping("")
+  public RecommendationRequest updateRecommendationRequest(
+      @Parameter(name = "id") @RequestParam Long id,
+      @RequestBody @Valid RecommendationRequest incoming) {
+
+    RecommendationRequest request =
+        recommendationrequestRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
+
+    request.setRequesterEmail(incoming.getRequesterEmail());
+    request.setProfessorEmail(incoming.getProfessorEmail());
+    request.setExplanation(incoming.getExplanation());
+    request.setDateRequested(incoming.getDateRequested());
+    request.setDateNeeded(incoming.getDateNeeded());
+    request.setDone(incoming.getDone());
+
+    recommendationrequestRepository.save(request);
 
     return request;
   }

@@ -50,11 +50,17 @@ public class RecommendationRequestController extends ApiController {
   public RecommendationRequest postRecommendationRequest(
       @Parameter(name = "requesterEmail") @RequestParam String requesterEmail,
       @Parameter(name = "professorEmail") @RequestParam String professorEmail,
-      @Parameter(name = "daterequested")
+      @Parameter(
+              name = "daterequested",
+              description =
+                  "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)")
           @RequestParam("dateRequested")
           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
           LocalDateTime daterequested,
-      @Parameter(name = "dateneeded")
+      @Parameter(
+              name = "dateneeded",
+              description =
+                  "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)")
           @RequestParam("dateNeeded")
           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
           LocalDateTime dateneeded,

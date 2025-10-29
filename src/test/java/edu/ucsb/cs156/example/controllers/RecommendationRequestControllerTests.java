@@ -77,6 +77,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("requester@ucsb.edu")
             .professorEmail("email@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)
@@ -114,6 +115,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)
@@ -125,7 +127,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
     MvcResult response =
         mockMvc
             .perform(
-                post("/api/recommendationrequest/post?requesterEmail=user@ucsb.edu&professorEmail=professor@ucsb.edu&dateRequested=2022-01-03T00:00:00&dateNeeded=2022-01-03T00:00:00&done=true")
+                post("/api/recommendationrequest/post?requesterEmail=user@ucsb.edu&professorEmail=professor@ucsb.edu&explanation=explanation&dateRequested=2022-01-03T00:00:00&dateNeeded=2022-01-03T00:00:00&done=true")
                     .with(csrf()))
             .andExpect(status().isOk())
             .andReturn();
@@ -155,6 +157,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)
@@ -205,15 +208,16 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
     // arrange
 
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
-    LocalDateTime ldt2 = LocalDateTime.parse("2023-01-03T00:00:00");
+    LocalDateTime ldt2 = LocalDateTime.parse("2023-01-03T00:00:10");
 
     RecommendationRequest request1 =
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
-            .done(true)
+            .done(false)
             .build();
 
     LocalDateTime ldt3 = LocalDateTime.parse("2022-01-03T00:00:10");
@@ -223,9 +227,10 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("newuser@ucsb.edu")
             .professorEmail("newprofessor@ucsb.edu")
-            .dateRequested(ldt3)
-            .dateNeeded(ldt4)
-            .done(false)
+            .explanation("explanation1")
+            .dateRequested(ldt2)
+            .dateNeeded(ldt1)
+            .done(true)
             .build();
 
     String requestBody = mapper.writeValueAsString(request2);
@@ -248,13 +253,14 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
     verify(recommendationrequestRepository, times(1)).findById(67L);
     verify(recommendationrequestRepository, times(1))
         .save(request2); // should be saved with correct user
+
     String responseString = response.getResponse().getContentAsString();
     assertEquals(requestBody, responseString);
   }
 
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
-  public void admin_cannot_edit_ucsbdate_that_does_not_exist() throws Exception {
+  public void admin_cannot_edit_request_that_does_not_exist() throws Exception {
     // arrange
 
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
@@ -264,6 +270,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
         RecommendationRequest.builder()
             .requesterEmail("user@ucsb.edu")
             .professorEmail("professor@ucsb.edu")
+            .explanation("explanation")
             .dateRequested(ldt1)
             .dateNeeded(ldt2)
             .done(true)

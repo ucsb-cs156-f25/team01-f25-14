@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.example.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -34,26 +36,22 @@ import org.springframework.test.web.servlet.MvcResult;
 public class ArticlesControllerTests extends ControllerTestCase {
 
   @MockBean ArticlesRepository articlesRepository;
-
   @MockBean UserRepository userRepository;
 
   // Authorization tests for /api/articles/all
 
   @Test
   public void logged_out_users_cannot_get_all() throws Exception {
-    mockMvc
-        .perform(get("/api/articles/all"))
-        .andExpect(status().is(403)); // logged out users can't get all
+    mockMvc.perform(get("/api/articles/all")).andExpect(status().is(403));
   }
 
   @WithMockUser(roles = {"USER"})
   @Test
   public void logged_in_users_can_get_all() throws Exception {
-    mockMvc.perform(get("/api/articles/all")).andExpect(status().is(200)); // logged
+    mockMvc.perform(get("/api/articles/all")).andExpect(status().is(200));
   }
 
   // Authorization tests for /api/articles/post
-  // (Perhaps should also have these for put and delete)
 
   @Test
   public void logged_out_users_cannot_post() throws Exception {
@@ -63,18 +61,17 @@ public class ArticlesControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"USER"})
   @Test
   public void logged_in_regular_users_cannot_post() throws Exception {
-    mockMvc.perform(post("/api/articles/post")).andExpect(status().is(403)); // only admins can post
+    // may be 403 due to role or csrf; either is fine for this test
+    mockMvc.perform(post("/api/articles/post")).andExpect(status().is(403));
   }
 
-  // // Tests with mocks for database actions
+  // Tests with mocks for database actions
 
   @WithMockUser(roles = {"USER"})
   @Test
   public void logged_in_user_can_get_all_articles() throws Exception {
 
-    // arrange
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
-
     Articles article1 =
         Articles.builder()
             .title("Article1")
@@ -85,7 +82,6 @@ public class ArticlesControllerTests extends ControllerTestCase {
             .build();
 
     LocalDateTime ldt2 = LocalDateTime.parse("2022-03-11T00:00:00");
-
     Articles article2 =
         Articles.builder()
             .title("Article2")
@@ -100,11 +96,8 @@ public class ArticlesControllerTests extends ControllerTestCase {
 
     when(articlesRepository.findAll()).thenReturn(expectedArticles);
 
-    // act
     MvcResult response =
         mockMvc.perform(get("/api/articles/all")).andExpect(status().isOk()).andReturn();
-
-    // assert
 
     verify(articlesRepository, times(1)).findAll();
     String expectedJson = mapper.writeValueAsString(expectedArticles);
@@ -115,22 +108,11 @@ public class ArticlesControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
   public void an_admin_user_can_post_a_new_article() throws Exception {
-    // arrange
-
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
 
-    Articles article1 =
-        Articles.builder()
-            .title("Article1")
-            .url("https://www.google.com")
-            .explanation("test")
-            .email("article1@test.com")
-            .dateAdded(ldt1)
-            .build();
+    // Make save(any()) return the same object it received (typical passthrough)
+    when(articlesRepository.save(any(Articles.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    when(articlesRepository.save(eq(article1))).thenReturn(article1);
-
-    // act
     MvcResult response =
         mockMvc
             .perform(
@@ -139,9 +121,19 @@ public class ArticlesControllerTests extends ControllerTestCase {
             .andExpect(status().isOk())
             .andReturn();
 
-    // assert
-    verify(articlesRepository, times(1)).save(article1);
-    String expectedJson = mapper.writeValueAsString(article1);
+    // Capture the entity actually passed to save(...)
+    ArgumentCaptor<Articles> captor = ArgumentCaptor.forClass(Articles.class);
+    verify(articlesRepository, times(1)).save(captor.capture());
+    Articles saved = captor.getValue();
+
+    assertEquals("Article1", saved.getTitle());
+    assertEquals("https://www.google.com", saved.getUrl());
+    assertEquals("test", saved.getExplanation());
+    assertEquals("article1@test.com", saved.getEmail());
+    assertEquals(ldt1, saved.getDateAdded());
+
+    // Response should echo the saved entity
+    String expectedJson = mapper.writeValueAsString(saved);
     String responseString = response.getResponse().getContentAsString();
     assertEquals(expectedJson, responseString);
   }
@@ -149,8 +141,6 @@ public class ArticlesControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
   public void admin_can_edit_an_existing_articles() throws Exception {
-    // arrange
-
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
     LocalDateTime ldt2 = LocalDateTime.parse("2023-01-03T00:00:00");
 
@@ -163,6 +153,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
             .dateAdded(ldt1)
             .build();
 
+    // What the client sends
     Articles articlesEdited =
         Articles.builder()
             .title("Second Article")
@@ -175,8 +166,8 @@ public class ArticlesControllerTests extends ControllerTestCase {
     String requestBody = mapper.writeValueAsString(articlesEdited);
 
     when(articlesRepository.findById(eq(67L))).thenReturn(Optional.of(articlesOrig));
+    when(articlesRepository.save(any(Articles.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    // act
     MvcResult response =
         mockMvc
             .perform(
@@ -188,17 +179,26 @@ public class ArticlesControllerTests extends ControllerTestCase {
             .andExpect(status().isOk())
             .andReturn();
 
-    // assert
     verify(articlesRepository, times(1)).findById(67L);
-    verify(articlesRepository, times(1)).save(articlesEdited); // should be saved with correct user
+
+    // Controller likely saves the *mutated original*, not the request instance.
+    ArgumentCaptor<Articles> captor = ArgumentCaptor.forClass(Articles.class);
+    verify(articlesRepository, times(1)).save(captor.capture());
+    Articles saved = captor.getValue();
+
+    assertEquals("Second Article", saved.getTitle());
+    assertEquals("https://example2.com", saved.getUrl());
+    assertEquals("Second explanation", saved.getExplanation());
+    assertEquals("test2@ucsb.edu", saved.getEmail());
+    assertEquals(ldt2, saved.getDateAdded());
+
     String responseString = response.getResponse().getContentAsString();
-    assertEquals(requestBody, responseString);
+    assertEquals(mapper.writeValueAsString(saved), responseString);
   }
 
-    @Test
+  @Test
   public void logged_out_users_cannot_get_by_id() throws Exception {
-    mockMvc.perform(get("/api/articles?id=7"))
-        .andExpect(status().is(403));
+    mockMvc.perform(get("/api/articles?id=7")).andExpect(status().is(403));
   }
 
   @WithMockUser(roles = {"USER"})
@@ -217,9 +217,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
     when(articlesRepository.findById(eq(7L))).thenReturn(Optional.of(article));
 
     MvcResult response =
-        mockMvc.perform(get("/api/articles?id=7"))
-            .andExpect(status().isOk())
-            .andReturn();
+        mockMvc.perform(get("/api/articles?id=7")).andExpect(status().isOk()).andReturn();
 
     verify(articlesRepository, times(1)).findById(7L);
     String expectedJson = mapper.writeValueAsString(article);
@@ -233,9 +231,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
     when(articlesRepository.findById(eq(7L))).thenReturn(Optional.empty());
 
     MvcResult response =
-        mockMvc.perform(get("/api/articles?id=7"))
-            .andExpect(status().isNotFound())
-            .andReturn();
+        mockMvc.perform(get("/api/articles?id=7")).andExpect(status().isNotFound()).andReturn();
 
     verify(articlesRepository, times(1)).findById(7L);
     Map<String, Object> json = responseToJson(response);
@@ -262,7 +258,8 @@ public class ArticlesControllerTests extends ControllerTestCase {
     when(articlesRepository.findById(eq(67L))).thenReturn(Optional.empty());
 
     MvcResult response =
-        mockMvc.perform(
+        mockMvc
+            .perform(
                 put("/api/articles?id=67")
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding("utf-8")

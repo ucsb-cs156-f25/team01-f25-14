@@ -216,13 +216,16 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
             .done(true)
             .build();
 
+    LocalDateTime ldt3 = LocalDateTime.parse("2022-01-03T00:00:10");
+    LocalDateTime ldt4 = LocalDateTime.parse("2023-01-03T00:00:10");
+
     RecommendationRequest request2 =
         RecommendationRequest.builder()
-            .requesterEmail("user@ucsb.edu")
+            .requesterEmail("newuser@ucsb.edu")
             .professorEmail("newprofessor@ucsb.edu")
-            .dateRequested(ldt1)
-            .dateNeeded(ldt2)
-            .done(true)
+            .dateRequested(ldt3)
+            .dateNeeded(ldt4)
+            .done(false)
             .build();
 
     String requestBody = mapper.writeValueAsString(request2);

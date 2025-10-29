@@ -225,7 +225,7 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
             .explanation("explanation1")
             .dateRequested(ldt2)
             .dateNeeded(ldt1)
-            .done(false)
+            .done(true)
             .build();
 
     String requestBody = mapper.writeValueAsString(request2);
@@ -248,13 +248,14 @@ public class RecommendationRequestControllerTests extends ControllerTestCase {
     verify(recommendationrequestRepository, times(1)).findById(67L);
     verify(recommendationrequestRepository, times(1))
         .save(request2); // should be saved with correct user
+
     String responseString = response.getResponse().getContentAsString();
     assertEquals(requestBody, responseString);
   }
 
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
-  public void admin_cannot_edit_ucsbdate_that_does_not_exist() throws Exception {
+  public void admin_cannot_edit_request_that_does_not_exist() throws Exception {
     // arrange
 
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");

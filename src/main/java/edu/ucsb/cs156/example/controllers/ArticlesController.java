@@ -7,6 +7,7 @@ import edu.ucsb.cs156.example.repositories.ArticlesRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,6 +95,35 @@ public class ArticlesController extends ApiController {
         articlesRepository
             .findById(id)
             .orElseThrow(() -> new EntityNotFoundException(Articles.class, id));
+
+    return articles;
+  }
+
+  /**
+   * Update a single article
+   *
+   * @param id id of the article to update
+   * @param incoming the new article
+   * @return the updated article object
+   */
+  @Operation(summary = "Update a single article")
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PutMapping("")
+  public Articles updateArticle(
+      @Parameter(name = "id") @RequestParam Long id, @RequestBody @Valid Articles incoming) {
+
+    Articles articles =
+        articlesRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException(Articles.class, id));
+
+    articles.setTitle(incoming.getTitle());
+    articles.setUrl(incoming.getUrl());
+    articles.setExplanation(incoming.getExplanation());
+    articles.setEmail(incoming.getEmail());
+    articles.setDateAdded(incoming.getDateAdded());
+
+    articlesRepository.save(articles);
 
     return articles;
   }

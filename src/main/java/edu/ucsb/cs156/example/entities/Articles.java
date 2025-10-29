@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(name = "menuitemreview")
-public class MenuItemReview {
+@Entity(name = "articles")
+public class Articles {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;

@@ -228,15 +228,15 @@ public class ArticlesControllerTests extends ControllerTestCase {
     assertEquals(ldt2, resp.getDateAdded());
   }
 
-  @Test
+    @Test
   public void logged_out_users_cannot_get_by_id() throws Exception {
-    mockMvc.perform(get("/api/articles?id=7")).andExpect(status().is(403)); // 未登录 403
+    mockMvc.perform(get("/api/articles?id=7"))
+        .andExpect(status().is(403));
   }
 
   @WithMockUser(roles = {"USER"})
   @Test
   public void logged_in_user_can_get_by_id_when_the_id_exists() throws Exception {
-    // arrange
     LocalDateTime ldt = LocalDateTime.parse("2022-01-03T00:00:00");
     Articles article =
         Articles.builder()
@@ -249,11 +249,11 @@ public class ArticlesControllerTests extends ControllerTestCase {
 
     when(articlesRepository.findById(eq(7L))).thenReturn(Optional.of(article));
 
-    // act
     MvcResult response =
-        mockMvc.perform(get("/api/articles?id=7")).andExpect(status().isOk()).andReturn();
+        mockMvc.perform(get("/api/articles?id=7"))
+            .andExpect(status().isOk())
+            .andReturn();
 
-    // assert
     verify(articlesRepository, times(1)).findById(7L);
     String expectedJson = mapper.writeValueAsString(article);
     String responseString = response.getResponse().getContentAsString();
@@ -263,14 +263,13 @@ public class ArticlesControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"USER"})
   @Test
   public void logged_in_user_get_by_id_returns_404_when_not_found() throws Exception {
-    // arrange
     when(articlesRepository.findById(eq(7L))).thenReturn(Optional.empty());
 
-    // act
     MvcResult response =
-        mockMvc.perform(get("/api/articles?id=7")).andExpect(status().isNotFound()).andReturn();
+        mockMvc.perform(get("/api/articles?id=7"))
+            .andExpect(status().isNotFound())
+            .andReturn();
 
-    // assert
     verify(articlesRepository, times(1)).findById(7L);
     Map<String, Object> json = responseToJson(response);
     assertEquals("EntityNotFoundException", json.get("type"));
@@ -280,8 +279,6 @@ public class ArticlesControllerTests extends ControllerTestCase {
   @WithMockUser(roles = {"ADMIN", "USER"})
   @Test
   public void admin_cannot_edit_articles_that_does_not_exist() throws Exception {
-    // arrange
-
     LocalDateTime ldt1 = LocalDateTime.parse("2022-01-03T00:00:00");
 
     Articles articlesEdited =
@@ -297,10 +294,8 @@ public class ArticlesControllerTests extends ControllerTestCase {
 
     when(articlesRepository.findById(eq(67L))).thenReturn(Optional.empty());
 
-    // act
     MvcResult response =
-        mockMvc
-            .perform(
+        mockMvc.perform(
                 put("/api/articles?id=67")
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding("utf-8")
@@ -309,7 +304,6 @@ public class ArticlesControllerTests extends ControllerTestCase {
             .andExpect(status().isNotFound())
             .andReturn();
 
-    // assert
     verify(articlesRepository, times(1)).findById(67L);
     Map<String, Object> json = responseToJson(response);
     assertEquals("Articles with id 67 not found", json.get("message"));

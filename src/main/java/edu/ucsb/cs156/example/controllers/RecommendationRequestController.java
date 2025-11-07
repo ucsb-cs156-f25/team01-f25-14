@@ -22,21 +22,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** This is a REST controller for UCSBDates */
+/** REST controller for RecommendationRequest */
 @Tag(name = "RecommendationRequest")
-@RequestMapping("/api/recommendationrequest")
+@RequestMapping("/api/recommendationrequests")
 @RestController
 @Slf4j
 public class RecommendationRequestController extends ApiController {
 
   @Autowired RecommendationRequestRepository recommendationrequestRepository;
 
-  @Operation(summary = "List all ucsb dates")
+  @Operation(summary = "List all recommendation requests")
   @PreAuthorize("hasRole('ROLE_USER')")
   @GetMapping("/all")
   public Iterable<RecommendationRequest> allRecommendationRequests() {
-    Iterable<RecommendationRequest> requests = recommendationrequestRepository.findAll();
-    return requests;
+    return recommendationrequestRepository.findAll();
   }
 
   /**
@@ -44,8 +43,9 @@ public class RecommendationRequestController extends ApiController {
    *
    * @param requesterEmail
    * @param professorEmail
-   * @param daterequested
-   * @param dateneeded
+   * @param explanation
+   * @param dateRequested
+   * @param dateNeeded
    * @param done
    * @return the saved request
    */
@@ -57,58 +57,47 @@ public class RecommendationRequestController extends ApiController {
       @Parameter(name = "professorEmail") @RequestParam String professorEmail,
       @Parameter(name = "explanation") @RequestParam String explanation,
       @Parameter(
-              name = "daterequested",
+              name = "dateRequested",
               description =
-                  "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)")
+                  "date (in ISO format, e.g., YYYY-MM-DDTHH:MM:SS; see"
+                      + " https://en.wikipedia.org/wiki/ISO_8601)")
           @RequestParam("dateRequested")
           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-          LocalDateTime daterequested,
+          LocalDateTime dateRequested,
       @Parameter(
-              name = "dateneeded",
+              name = "dateNeeded",
               description =
-                  "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)")
+                  "date (in ISO format, e.g., YYYY-MM-DDTHH:MM:SS; see"
+                      + " https://en.wikipedia.org/wiki/ISO_8601)")
           @RequestParam("dateNeeded")
           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-          LocalDateTime dateneeded,
+          LocalDateTime dateNeeded,
       @Parameter(name = "done") @RequestParam boolean done)
       throws JsonProcessingException {
 
-    // For an explanation of @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    // See: https://www.baeldung.com/spring-date-parameters
+    log.info("dateRequested={}", dateRequested);
+    log.info("dateNeeded={}", dateNeeded);
 
-    log.info("localDateTime={}", daterequested);
-    log.info("localDateTime={}", dateneeded);
+    RecommendationRequest request =
+        RecommendationRequest.builder()
+            .requesterEmail(requesterEmail)
+            .professorEmail(professorEmail)
+            .explanation(explanation)
+            .dateRequested(dateRequested)
+            .dateNeeded(dateNeeded)
+            .done(done)
+            .build();
 
-    RecommendationRequest request = new RecommendationRequest();
-    request.setRequesterEmail(requesterEmail);
-    request.setProfessorEmail(professorEmail);
-    request.setExplanation(explanation);
-    request.setDateRequested(daterequested);
-    request.setDateNeeded(dateneeded);
-    request.setDone(done);
-
-    RecommendationRequest savedRecommendationRequest =
-        recommendationrequestRepository.save(request);
-
-    return savedRecommendationRequest;
+    return recommendationrequestRepository.save(request);
   }
 
-  /**
-   * Get a single date by id
-   *
-   * @param id the id of the date
-   * @return a UCSBDate
-   */
-  @Operation(summary = "Get a request")
+  @Operation(summary = "Get a request by id")
   @PreAuthorize("hasRole('ROLE_USER')")
   @GetMapping("")
   public RecommendationRequest getById(@Parameter(name = "id") @RequestParam Long id) {
-    RecommendationRequest request =
-        recommendationrequestRepository
-            .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
-
-    return request;
+    return recommendationrequestRepository
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
   }
 
   @Operation(summary = "Update a single request")
